@@ -5,6 +5,16 @@
 
 #include <iostream>
 
+class Category {
+private:
+	static float balance;
+public:
+	float getBalance() {
+
+		return balance;
+	}
+};
+
 void clearConsole() {
 #ifdef _WIN32
 	system("cls");
@@ -16,7 +26,7 @@ void clearConsole() {
 int main() {
 
 	char input_option;
-	std::string version = "PROTOTYPE - 01";
+	std::string version = "PROTOTYPE";
 
 	// Basic ANSI escape codes
 	const std::string RESET = "\033[0m";
@@ -29,9 +39,16 @@ int main() {
 		std::cout << "------------------------------------------------------------" << std::endl << std::endl;
 
 		std::cout << "[a]dd transaction" << std::endl;
-		std::cout <<
+		std::cout << "[d]elete transaction" << std::endl;
+		std::cout << "[l]ist expenses" << std::endl;
+		std::cout << "[e]dit expense" << std::endl;
 
-			std::cin.get();
+		std::cout << "Select option : " << std::endl;
+		std::cin >> input_option;
+		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
+
+
+		std::cin.get();
 	}
 }
 
