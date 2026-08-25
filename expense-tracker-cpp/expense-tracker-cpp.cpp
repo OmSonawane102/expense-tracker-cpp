@@ -7,11 +7,17 @@
 
 class Category {
 private:
-	static float balance;
+	float m_balance;
 public:
+	Category() {
+		m_balance = 0;
+	}
 	float getBalance() {
 
-		return balance;
+		return m_balance;
+	}
+	void setBalance(float bal) {
+		m_balance = bal;
 	}
 };
 
@@ -27,10 +33,14 @@ int main() {
 
 	char input_option;
 	std::string version = "PROTOTYPE";
+	float amount;
 
 	// Basic ANSI escape codes
 	const std::string RESET = "\033[0m";
 	const std::string BOLD = "\033[1m";
+
+	// Initial balance creation
+	Category bal;
 
 	while (true) {
 		clearConsole(); // clear screen after each iteration 
@@ -47,6 +57,13 @@ int main() {
 		std::cin >> input_option;
 		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
 
+		if (input_option == 'a') {
+			std::cout << "Input amount : ";
+			std::cin >> amount;
+			if (amount < bal.getBalance()) {
+				std::cout << "Insufficient amount" << std::endl;
+			}
+		}
 
 		std::cin.get();
 	}
