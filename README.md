@@ -13,6 +13,7 @@ The main goal of this project is to practice **C++ programming, OOP, file handli
 
 ## Planned Features
 
+* [x] Display basic menu
 * [ ] Add a new expense
 * [ ] View all expenses
 * [ ] Edit an expense
