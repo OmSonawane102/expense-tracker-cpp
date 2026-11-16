@@ -42,6 +42,7 @@ int main() {
 
 		std::cout << "[a]dd expense" << std::endl;
 		std::cout << "[b]alance add" << std::endl;
+		std::cout << "[c]heck balance" << std::endl;
 		std::cout << "[d]elete expense" << std::endl;
 		std::cout << "[l]ist expenses" << std::endl;
 		std::cout << "[e]dit expense" << std::endl;
@@ -80,6 +81,9 @@ int main() {
 				balance.setBalance(balance.getBalance() + amount);
 				std::cout << "Balance updated. New balance : " << std::fixed << std::setprecision(2) << balance.getBalance() << std::endl;
 			}
+		}
+		else if (inputOption == 'c') {
+			std::cout << "Current balance : " << std::fixed << std::setprecision(2) << balance.getBalance() << std::endl;
 		}
 		else if (inputOption == 'd') {
 			if (expenses.empty()) { // nothing to delete
