@@ -3,7 +3,7 @@
 A simple **command-line Expense Tracker** built using **C++**.
 
 > 🚧 **Project Status: In Development (Prototype)**
-> Core CRUD operations are working. Persistence, categories, and other features are still in progress.
+> Core CRUD operations, balance management, and expense categories are working. Persistence and advanced features are still in progress.
 
 ## About
 
@@ -16,35 +16,74 @@ The main goal of this project is to practice **C++ programming, OOP, file handli
 ### ✅ Completed
 * Display main menu with ANSI styling
 * Add a new expense (with balance check)
-* View all expenses in a formatted table
-* Edit an existing expense (description + amount)
+* View all expenses in a formatted table (ID, Description, Category, Amount)
+* Edit an existing expense (description, amount, and category)
 * Delete an expense (refunds balance)
-* In-memory balance tracking
+* Check current balance at any time
+* Add balance manually via dedicated menu option
+* **Expense categories** — select from a sub-menu when adding/editing:
+  * Food, Rent, Education, Transport, Entertainment, Health, Shopping, Other
+* Monetary values use `double` for precision
+* Balance starts at zero — user adds balance before logging expenses
+* "Press enter to continue" UX after every action
 
 ### 🔄 In Progress / Planned
 * [ ] Input validation (guard against non-numeric input)
 * [ ] Save data to file (CSV or JSON)
 * [ ] Load data when the program starts
 * [ ] Search expenses by description or ID
-* [ ] Categorize expenses
 * [ ] Track income separately
 * [ ] Calculate total expenses
 * [ ] Monthly expense summary
 * [ ] Budget tracking
+* [ ] Unit testing
+
+## Menu Options
+
+| Key | Action |
+|-----|--------|
+| `a` | Add a new expense |
+| `b` | Add balance to wallet |
+| `c` | Check current balance |
+| `d` | Delete an expense by ID |
+| `l` | List all expenses |
+| `e` | Edit an existing expense |
+| `q` | Quit |
+
+## Expense Categories
+
+When adding or editing an expense, a category sub-menu is shown:
+
+```
+  Select category :
+  [1] Food
+  [2] Rent
+  [3] Education
+  [4] Transport
+  [5] Entertainment
+  [6] Health
+  [7] Shopping
+  [8] Other
+```
 
 ## Technologies
 
 * **C++20**
-* Standard C++ Library (`<list>`, `<iomanip>`, `<string>`)
+* Standard C++ Library (`<list>`, `<iomanip>`, `<string>`, `<limits>`)
 * Object-Oriented Programming
 * CMake + Ninja build system
 * MSVC compiler (Visual Studio)
 
-## Project Status
+## Project Structure
 
-The project is developed **phase by phase**. The prototype has the core menu and all basic CRUD operations working in-memory. The next major milestone is **file persistence** so data survives between sessions.
-
-This README is updated as the project grows.
+```
+expense-tracker-cpp/
+├── expense-tracker-cpp/
+│   ├── expense-tracker-cpp.h    # Class declarations (Transaction, Wallet, ExpenseCategory enum)
+│   └── expense-tracker-cpp.cpp  # Main logic, menu, category helpers
+├── CMakeLists.txt
+└── CMakePresets.json
+```
 
 ## How to Run
 
@@ -65,10 +104,10 @@ cmake --build out/build/x64-debug
 
 * File persistence (CSV / JSON)
 * Input validation & error handling
-* Expense categories
+* Search & filter by category or description
 * Monthly summary & statistics
+* Budget tracking per category
 * Unit testing
-* Improved CLI interface
 
 ## AI Assistant
 
