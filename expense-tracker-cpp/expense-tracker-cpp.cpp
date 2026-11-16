@@ -171,6 +171,7 @@ int main() {
 			return 0;
 		}
 
+		std::cout << "\nPress enter to continue...";
 		std::cin.get();
 	}
 }
