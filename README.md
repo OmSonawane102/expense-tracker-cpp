@@ -2,62 +2,77 @@
 
 A simple **command-line Expense Tracker** built using **C++**.
 
-> 🚧 **Project Status: In Development**
-> This project is currently being built, and some features are not completed yet.
+> 🚧 **Project Status: In Development (Prototype)**
+> Core CRUD operations are working. Persistence, categories, and other features are still in progress.
 
 ## About
 
-The Expense Tracker will allow users to record and manage their daily expenses from the terminal.
+The Expense Tracker allows users to record and manage their daily expenses from the terminal.
 
 The main goal of this project is to practice **C++ programming, OOP, file handling, data structures, and clean project organization**.
 
-## Planned Features
+## Features
 
-* [x] Display basic menu
-* [ ] Add a new expense
-* [ ] View all expenses
-* [ ] Edit an expense
-* [ ] Delete an expense
-* [ ] Search expenses
+### ✅ Completed
+* Display main menu with ANSI styling
+* Add a new expense (with balance check)
+* View all expenses in a formatted table
+* Edit an existing expense (description + amount)
+* Delete an expense (refunds balance)
+* In-memory balance tracking
+
+### 🔄 In Progress / Planned
+* [ ] Input validation (guard against non-numeric input)
+* [ ] Save data to file (CSV or JSON)
+* [ ] Load data when the program starts
+* [ ] Search expenses by description or ID
 * [ ] Categorize expenses
-* [ ] Track income
+* [ ] Track income separately
 * [ ] Calculate total expenses
 * [ ] Monthly expense summary
 * [ ] Budget tracking
-* [ ] Save data to files
-* [ ] Load data when the program starts
-* [ ] Input validation
-* [ ] Simple CLI menu
 
 ## Technologies
 
-* **C++**
-* Standard C++ Library
-* File Handling
+* **C++20**
+* Standard C++ Library (`<list>`, `<iomanip>`, `<string>`)
 * Object-Oriented Programming
-* Data Structures
+* CMake + Ninja build system
+* MSVC compiler (Visual Studio)
 
 ## Project Status
 
-The project is being developed **phase by phase**. Features will be added and improved over time.
+The project is developed **phase by phase**. The prototype has the core menu and all basic CRUD operations working in-memory. The next major milestone is **file persistence** so data survives between sessions.
 
-This README will also be updated as the project grows.
+This README is updated as the project grows.
 
 ## How to Run
 
-The project is currently under development. Build and run instructions will be added once the initial project structure is complete.
+**Requirements:** Visual Studio 2022, CMake ≥ 3.10, Ninja
+
+```bash
+# Configure (x64 Debug)
+cmake --preset x64-debug
+
+# Build
+cmake --build out/build/x64-debug
+
+# Run
+.\out\build\x64-debug\expense-tracker-cpp\expense-tracker-cpp.exe
+```
 
 ## Future Improvements
 
-Possible future additions include:
-
-* Advanced reports
-* Expense statistics
-* CSV/JSON data support
-* Better CLI interface
-* Data backup
+* File persistence (CSV / JSON)
+* Input validation & error handling
+* Expense categories
+* Monthly summary & statistics
 * Unit testing
-* CMake build system
+* Improved CLI interface
+
+## AI Assistant
+
+This project is being developed with the help of **[Antigravity CLI](https://antigravity.dev)** — an AI coding assistant by Google DeepMind, used for code analysis, planning, and step-by-step feature development.
 
 ## Author
 
