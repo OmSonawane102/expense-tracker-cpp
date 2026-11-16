@@ -22,7 +22,7 @@ int main() {
 
 	char inputOption;
 	std::string version = "PROTOTYPE";
-	float amount;
+	double amount;
 	std::list<Transaction> expenses;
 	std::list<Transaction>::iterator it; // iterator used by list / delete / edit
 
@@ -32,7 +32,7 @@ int main() {
 
 	// Initial balance creation
 	Category balance;
-	balance.setBalance(1000); // TEMPORARY starting balance so expenses can be added, change or remove later
+	balance.setBalance(0); // starts at zero; use [b]alance add to top up
 
 	while (true) {
 		clearConsole(); // clear screen after each iteration 

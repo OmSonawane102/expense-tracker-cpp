@@ -14,20 +14,20 @@ private:
 	static int next_id;
 	int m_id;
 	std::string m_description;
-	float m_price;
+	double m_price;
 
 public:
 	Transaction() : m_id(next_id++), m_description("Transaction"), m_price(0) {}
-	Transaction(std::string desc, float amt) : m_id(next_id++), m_description(desc), m_price(amt) {}
+	Transaction(std::string desc, double amt) : m_id(next_id++), m_description(desc), m_price(amt) {}
 
 	// Getters
 	int getID() const { return m_id; }
 	std::string getDescription() const { return m_description; }
-	float getPrice() const { return m_price; }
+	double getPrice() const { return m_price; }
 
 	// Setters
 	void setDescription(std::string desc) { m_description = desc; }
-	void setPrice(float amt) { m_price = amt; }
+	void setPrice(double amt) { m_price = amt; }
 };
 
 // ---------------------------------------------------------------------------
@@ -37,13 +37,13 @@ public:
 // ---------------------------------------------------------------------------
 class Category {
 private:
-	float m_balance;
+	double m_balance;
 
 public:
 	Category() : m_balance(0) {}
 
-	float getBalance() const { return m_balance; }
-	void setBalance(float bal) { m_balance = bal; }
+	double getBalance() const { return m_balance; }
+	void setBalance(double bal) { m_balance = bal; }
 };
 
 // ---------------------------------------------------------------------------
