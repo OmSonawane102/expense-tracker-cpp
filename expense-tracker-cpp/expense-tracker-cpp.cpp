@@ -1,50 +1,14 @@
 ﻿// expense-tracker-cpp.cpp : Defines the entry point for the application.
 
+#include "expense-tracker-cpp.h"
 #include <iostream>
-#include <string>
 #include <limits>
 #include <list>
-#include <iomanip> // NEW: setw() / setprecision() for the list output
+#include <iomanip>
 #include <cstdlib>
 
-class Transaction {
-private:
-	static int next_id;
-	int ID;
-	std::string Description;
-	float price;
-
-public:
-	Transaction() : ID(next_id++), Description("Transaction"), price(0) {}
-	Transaction(std::string desc, float amt) : ID(next_id++), Description(desc), price(amt) {}
-
-	// NEW: getters (const, same style as TodoItem) so main() can read a transaction
-	int getID() const { return ID; }
-	std::string getDescription() const { return Description; }
-	float getPrice() const { return price; }
-
-	// NEW: setters so the edit option can change a transaction
-	void setDescription(std::string desc) { Description = desc; }
-	void setPrice(float amt) { price = amt; }
-};
-
+// Static member definition (must live in exactly one .cpp)
 int Transaction::next_id = 1;
-
-class Category {
-private:
-	float m_balance;
-public:
-	Category() {
-		m_balance = 0;
-	}
-	float getBalance() {
-
-		return m_balance;
-	}
-	void setBalance(float bal) {
-		m_balance = bal;
-	}
-};
 
 void clearConsole() {
 #ifdef _WIN32
@@ -56,19 +20,19 @@ void clearConsole() {
 
 int main() {
 
-	char input_option;
+	char inputOption;
 	std::string version = "PROTOTYPE";
 	float amount;
-	std::list<Transaction> Expense;
-	std::list<Transaction>::iterator it; // NEW: iterator used by list / delete / edit
+	std::list<Transaction> expenses;
+	std::list<Transaction>::iterator it; // iterator used by list / delete / edit
 
 	// Basic ANSI escape codes
 	const std::string RESET = "\033[0m";
 	const std::string BOLD = "\033[1m";
 
 	// Initial balance creation
-	Category bal;
-	bal.setBalance(1000); // TEMPORARY starting balance so expenses can be added, change or remove later
+	Category balance;
+	balance.setBalance(1000); // TEMPORARY starting balance so expenses can be added, change or remove later
 
 	while (true) {
 		clearConsole(); // clear screen after each iteration 
@@ -77,94 +41,111 @@ int main() {
 		std::cout << "------------------------------------------------------------" << std::endl << std::endl;
 
 		std::cout << "[a]dd expense" << std::endl;
+		std::cout << "[b]alance add" << std::endl;
 		std::cout << "[d]elete expense" << std::endl;
 		std::cout << "[l]ist expenses" << std::endl;
 		std::cout << "[e]dit expense" << std::endl;
 		std::cout << "[q]uit" << std::endl;
 
+		std::cout << "------------------------------------------------------------" << std::endl << std::endl;
+
+
 		std::cout << "Select option : ";
-		std::cin >> input_option;
+		std::cin >> inputOption;
 		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-		if (input_option == 'a') {
+		if (inputOption == 'a') {
 			std::cout << "Input amount : ";
 			std::cin >> amount;
 			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-			if (amount > bal.getBalance()) {
+			if (amount > balance.getBalance()) {
 				std::cout << "Insufficient amount" << std::endl;
 			}
 			else {
 				std::string desc;
 				std::cout << "Enter expense description : ";
 				std::getline(std::cin, desc);
-				Expense.push_back(Transaction(desc, amount));
-				bal.setBalance(bal.getBalance() - amount); // NEW: money spent leaves the balance
+				expenses.push_back(Transaction(desc, amount));
+				balance.setBalance(balance.getBalance() - amount); // money spent leaves the balance
 			}
 		}
-		else if (input_option == 'd') {
-			if (Expense.empty()) { // NEW: nothing to delete
+		else if (inputOption == 'b') {
+			std::cout << "Enter amount to add : ";
+			std::cin >> amount;
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			if (amount <= 0) {
+				std::cout << "Amount must be greater than zero." << std::endl;
+			}
+			else {
+				balance.setBalance(balance.getBalance() + amount);
+				std::cout << "Balance updated. New balance : " << std::fixed << std::setprecision(2) << balance.getBalance() << std::endl;
+			}
+		}
+		else if (inputOption == 'd') {
+			if (expenses.empty()) { // nothing to delete
 				std::cout << "Nothing to delete - your list is empty." << std::endl;
 			}
 			else {
-				int ID;
+				int id;
 				std::cout << "Delete transaction ID : ";
-				std::cin >> ID;
+				std::cin >> id;
 				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
 				// search the list, stop at the matching ID (or reach the end if none matches)
-				for (it = Expense.begin(); it != Expense.end(); it++) {
-					if (ID == it->getID()) {
+				for (it = expenses.begin(); it != expenses.end(); it++) {
+					if (id == it->getID()) {
 						break;
 					}
 				}
 
-				if (it == Expense.end()) {
+				if (it == expenses.end()) {
 					std::cout << "Invalid ID no transaction found." << std::endl;
 				}
 				else {
-					bal.setBalance(bal.getBalance() + it->getPrice()); // NEW: deleted expense gives money back
-					Expense.erase(it);
+					balance.setBalance(balance.getBalance() + it->getPrice()); // deleted expense gives money back
+					expenses.erase(it);
 					std::cout << "Transaction deleted." << std::endl;
 				}
 			}
 		}
-		else if (input_option == 'l') {
-			if (Expense.empty()) {
+		else if (inputOption == 'l') {
+			if (expenses.empty()) {
 				std::cout << "No expenses to show." << std::endl;
 			}
 			else {
+				
 				std::cout << std::fixed << std::setprecision(2); // show amounts with 2 decimals
 				std::cout << std::right << std::setw(4) << "ID" << " | " << std::left << std::setw(30) << "Description" << " | " << "Amount" << std::endl;
 				std::cout << "------------------------------------------------------------" << std::endl;
-				for (it = Expense.begin(); it != Expense.end(); it++) {
+				for (it = expenses.begin(); it != expenses.end(); it++) {
 					std::cout << std::right << std::setw(4) << it->getID() << " | " << std::left << std::setw(30) << it->getDescription() << " | " << it->getPrice() << std::endl;
 				}
 			}
 			std::cout << "------------------------------------------------------------" << std::endl;
-			std::cout << "Remaining balance : " << std::fixed << std::setprecision(2) << bal.getBalance() << std::endl;
+			std::cout << "Remaining balance : " << std::fixed << std::setprecision(2) << balance.getBalance() << std::endl;
 		}
-		else if (input_option == 'e') {
-			if (Expense.empty()) { // NEW: nothing to edit
+		else if (inputOption == 'e') {
+			if (expenses.empty()) { // nothing to edit
 				std::cout << "Nothing to edit - your list is empty." << std::endl;
 			}
 			else {
-				int ID;
+				int id;
 				std::cout << "Edit transaction ID : ";
-				std::cin >> ID;
+				std::cin >> id;
 				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-				for (it = Expense.begin(); it != Expense.end(); it++) {
-					if (ID == it->getID()) {
+				for (it = expenses.begin(); it != expenses.end(); it++) {
+					if (id == it->getID()) {
 						break;
 					}
 				}
 
-				if (it == Expense.end()) {
+				if (it == expenses.end()) {
 					std::cout << "Invalid ID no transaction found." << std::endl;
 				}
 				else {
 					// money available = current balance + the old amount (which we are replacing)
-					float available = bal.getBalance() + it->getPrice();
+					float available = balance.getBalance() + it->getPrice();
 
 					std::cout << "Enter new amount : ";
 					std::cin >> amount;
@@ -178,13 +159,13 @@ int main() {
 						std::getline(std::cin, desc);
 						it->setDescription(desc);
 						it->setPrice(amount);
-						bal.setBalance(available - amount);
+						balance.setBalance(available - amount);
 						std::cout << "Transaction updated." << std::endl;
 					}
 				}
 			}
 		}
-		else if (input_option == 'q') {
+		else if (inputOption == 'q') {
 			std::cout << "Press enter to exit.....";
 			std::cin.get();
 			return 0;
