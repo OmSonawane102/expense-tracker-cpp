@@ -18,24 +18,67 @@ void clearConsole() {
 #endif
 }
 
+std::string categoryToString(ExpenseCategory cat) {
+	switch (cat) {
+		case ExpenseCategory::Food:          return "Food";
+		case ExpenseCategory::Rent:          return "Rent";
+		case ExpenseCategory::Education:     return "Education";
+		case ExpenseCategory::Transport:     return "Transport";
+		case ExpenseCategory::Entertainment: return "Entertainment";
+		case ExpenseCategory::Health:        return "Health";
+		case ExpenseCategory::Shopping:      return "Shopping";
+		case ExpenseCategory::Other:         return "Other";
+		default:                             return "Unknown";
+	}
+}
+
+ExpenseCategory selectCategory() {
+	std::cout << std::endl;
+	std::cout << "  Select category :" << std::endl;
+	std::cout << "  [1] Food" << std::endl;
+	std::cout << "  [2] Rent" << std::endl;
+	std::cout << "  [3] Education" << std::endl;
+	std::cout << "  [4] Transport" << std::endl;
+	std::cout << "  [5] Entertainment" << std::endl;
+	std::cout << "  [6] Health" << std::endl;
+	std::cout << "  [7] Shopping" << std::endl;
+	std::cout << "  [8] Other" << std::endl;
+	std::cout << "  Choice : ";
+
+	int choice;
+	std::cin >> choice;
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+	switch (choice) {
+		case 1: return ExpenseCategory::Food;
+		case 2: return ExpenseCategory::Rent;
+		case 3: return ExpenseCategory::Education;
+		case 4: return ExpenseCategory::Transport;
+		case 5: return ExpenseCategory::Entertainment;
+		case 6: return ExpenseCategory::Health;
+		case 7: return ExpenseCategory::Shopping;
+		default: return ExpenseCategory::Other;
+	}
+}
+
 int main() {
 
 	char inputOption;
 	std::string version = "PROTOTYPE";
 	double amount;
 	std::list<Transaction> expenses;
-	std::list<Transaction>::iterator it; // iterator used by list / delete / edit
+	std::list<Transaction>::iterator it;
 
 	// Basic ANSI escape codes
 	const std::string RESET = "\033[0m";
 	const std::string BOLD = "\033[1m";
 
-	// Initial balance creation
-	Category balance;
+	// Initial wallet
+	Wallet balance;
 	balance.setBalance(0); // starts at zero; use [b]alance add to top up
 
 	while (true) {
-		clearConsole(); // clear screen after each iteration 
+		clearConsole();
 
 		std::cout << BOLD << "Expense Tracker CLI - " << RESET << version << std::endl;
 		std::cout << "------------------------------------------------------------" << std::endl << std::endl;
@@ -49,7 +92,6 @@ int main() {
 		std::cout << "[q]uit" << std::endl;
 
 		std::cout << "------------------------------------------------------------" << std::endl << std::endl;
-
 
 		std::cout << "Select option : ";
 		std::cin >> inputOption;
@@ -66,8 +108,10 @@ int main() {
 				std::string desc;
 				std::cout << "Enter expense description : ";
 				std::getline(std::cin, desc);
-				expenses.push_back(Transaction(desc, amount));
-				balance.setBalance(balance.getBalance() - amount); // money spent leaves the balance
+				ExpenseCategory cat = selectCategory();
+				expenses.push_back(Transaction(desc, amount, cat));
+				balance.setBalance(balance.getBalance() - amount);
+				std::cout << "Expense added." << std::endl;
 			}
 		}
 		else if (inputOption == 'b') {
@@ -86,7 +130,7 @@ int main() {
 			std::cout << "Current balance : " << std::fixed << std::setprecision(2) << balance.getBalance() << std::endl;
 		}
 		else if (inputOption == 'd') {
-			if (expenses.empty()) { // nothing to delete
+			if (expenses.empty()) {
 				std::cout << "Nothing to delete - your list is empty." << std::endl;
 			}
 			else {
@@ -95,7 +139,6 @@ int main() {
 				std::cin >> id;
 				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-				// search the list, stop at the matching ID (or reach the end if none matches)
 				for (it = expenses.begin(); it != expenses.end(); it++) {
 					if (id == it->getID()) {
 						break;
@@ -106,7 +149,7 @@ int main() {
 					std::cout << "Invalid ID no transaction found." << std::endl;
 				}
 				else {
-					balance.setBalance(balance.getBalance() + it->getPrice()); // deleted expense gives money back
+					balance.setBalance(balance.getBalance() + it->getPrice());
 					expenses.erase(it);
 					std::cout << "Transaction deleted." << std::endl;
 				}
@@ -117,19 +160,24 @@ int main() {
 				std::cout << "No expenses to show." << std::endl;
 			}
 			else {
-				
-				std::cout << std::fixed << std::setprecision(2); // show amounts with 2 decimals
-				std::cout << std::right << std::setw(4) << "ID" << " | " << std::left << std::setw(30) << "Description" << " | " << "Amount" << std::endl;
+				std::cout << std::fixed << std::setprecision(2);
+				std::cout << std::right << std::setw(4) << "ID"
+					<< " | " << std::left << std::setw(25) << "Description"
+					<< " | " << std::left << std::setw(15) << "Category"
+					<< " | " << "Amount" << std::endl;
 				std::cout << "------------------------------------------------------------" << std::endl;
 				for (it = expenses.begin(); it != expenses.end(); it++) {
-					std::cout << std::right << std::setw(4) << it->getID() << " | " << std::left << std::setw(30) << it->getDescription() << " | " << it->getPrice() << std::endl;
+					std::cout << std::right << std::setw(4) << it->getID()
+						<< " | " << std::left << std::setw(25) << it->getDescription()
+						<< " | " << std::left << std::setw(15) << categoryToString(it->getCategory())
+						<< " | " << it->getPrice() << std::endl;
 				}
 			}
 			std::cout << "------------------------------------------------------------" << std::endl;
 			std::cout << "Remaining balance : " << std::fixed << std::setprecision(2) << balance.getBalance() << std::endl;
 		}
 		else if (inputOption == 'e') {
-			if (expenses.empty()) { // nothing to edit
+			if (expenses.empty()) {
 				std::cout << "Nothing to edit - your list is empty." << std::endl;
 			}
 			else {
@@ -148,8 +196,7 @@ int main() {
 					std::cout << "Invalid ID no transaction found." << std::endl;
 				}
 				else {
-					// money available = current balance + the old amount (which we are replacing)
-					float available = balance.getBalance() + it->getPrice();
+					double available = balance.getBalance() + it->getPrice();
 
 					std::cout << "Enter new amount : ";
 					std::cin >> amount;
@@ -161,8 +208,10 @@ int main() {
 						std::string desc;
 						std::cout << "Enter new description : ";
 						std::getline(std::cin, desc);
+						ExpenseCategory cat = selectCategory();
 						it->setDescription(desc);
 						it->setPrice(amount);
+						it->setCategory(cat);
 						balance.setBalance(available - amount);
 						std::cout << "Transaction updated." << std::endl;
 					}
