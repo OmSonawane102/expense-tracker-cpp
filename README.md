@@ -3,7 +3,7 @@
 A simple **command-line Expense Tracker** built using **C++**.
 
 > 🚧 **Project Status: In Development (Prototype)**
-> Core CRUD operations, balance management, and expense categories are working. Persistence and advanced features are still in progress.
+> Core CRUD operations, balance management, expense categories, and input validation are working. Persistence and advanced features are still in progress.
 
 ## About
 
@@ -26,16 +26,22 @@ The main goal of this project is to practice **C++ programming, OOP, file handli
 * Monetary values use `double` for precision
 * Balance starts at zero — user adds balance before logging expenses
 * "Press enter to continue" UX after every action
+* **Input validation** across all user prompts:
+  * Re-prompts on non-numeric input (amounts, IDs, category choice)
+  * Rejects empty/whitespace-only descriptions
+  * Category selection enforces 1–8 range
+  * Invalid menu options show a clear error message
 
 ### 🔄 In Progress / Planned
-* [ ] Input validation (guard against non-numeric input)
-* [ ] Save data to file (CSV or JSON)
+* [ ] Save data to file (JSON via nlohmann/json — header included)
 * [ ] Load data when the program starts
+* [ ] Date/timestamp per expense
 * [ ] Search expenses by description or ID
-* [ ] Track income separately
-* [ ] Calculate total expenses
-* [ ] Monthly expense summary
-* [ ] Budget tracking
+* [ ] Filter by category
+* [ ] Monthly / weekly expense summary
+* [ ] Budget tracking per category
+* [ ] Color-coded output (over-budget = red, safe = green)
+* [ ] Export to CSV
 * [ ] Unit testing
 
 ## Menu Options
@@ -69,8 +75,9 @@ When adding or editing an expense, a category sub-menu is shown:
 ## Technologies
 
 * **C++20**
-* Standard C++ Library (`<list>`, `<iomanip>`, `<string>`, `<limits>`)
+* Standard C++ Library (`<list>`, `<iomanip>`, `<string>`, `<limits>`, `<algorithm>`)
 * Object-Oriented Programming
+* [nlohmann/json](https://github.com/nlohmann/json) — single-header JSON library (vendored)
 * CMake + Ninja build system
 * MSVC compiler (Visual Studio)
 
@@ -79,8 +86,9 @@ When adding or editing an expense, a category sub-menu is shown:
 ```
 expense-tracker-cpp/
 ├── expense-tracker-cpp/
-│   ├── expense-tracker-cpp.h    # Class declarations (Transaction, Wallet, ExpenseCategory enum)
-│   └── expense-tracker-cpp.cpp  # Main logic, menu, category helpers
+│   ├── expense-tracker-cpp.h    # Class declarations (Transaction, Wallet, ExpenseCategory)
+│   ├── expense-tracker-cpp.cpp  # Main logic, menu, input helpers, category helpers
+│   └── json.hpp                 # nlohmann/json single-header (vendored)
 ├── CMakeLists.txt
 └── CMakePresets.json
 ```
@@ -102,11 +110,12 @@ cmake --build out/build/x64-debug
 
 ## Future Improvements
 
-* File persistence (CSV / JSON)
-* Input validation & error handling
+* File persistence (JSON)
+* Date/timestamp per transaction
 * Search & filter by category or description
 * Monthly summary & statistics
 * Budget tracking per category
+* Color-coded terminal output
 * Unit testing
 
 ## AI Assistant
