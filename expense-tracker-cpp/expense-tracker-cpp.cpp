@@ -6,6 +6,7 @@
 #include <list>
 #include <iomanip>
 #include <cstdlib>
+#include <algorithm>
 
 // Static member definition (must live in exactly one .cpp)
 int Transaction::next_id = 1;
@@ -17,6 +18,65 @@ void clearConsole() {
 	system("clear");
 #endif
 }
+
+// ---------------------------------------------------------------------------
+// Input helpers
+// ---------------------------------------------------------------------------
+
+// Reads a double > minVal (default 0). Re-prompts on non-numeric or out-of-range.
+double readDouble(const std::string& prompt, double minVal = 0.0) {
+	double value;
+	while (true) {
+		std::cout << prompt;
+		if (std::cin >> value) {
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			if (value > minVal) {
+				return value;
+			}
+			std::cout << "  [!] Amount must be greater than "
+				<< std::fixed << std::setprecision(2) << minVal
+				<< ". Please try again." << std::endl;
+		}
+		else {
+			std::cout << "  [!] Invalid input. Please enter a numeric value." << std::endl;
+			std::cin.clear();
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		}
+	}
+}
+
+// Reads an integer. Re-prompts on non-numeric input.
+int readInt(const std::string& prompt) {
+	int value;
+	while (true) {
+		std::cout << prompt;
+		if (std::cin >> value) {
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			return value;
+		}
+		std::cout << "  [!] Invalid input. Please enter a whole number." << std::endl;
+		std::cin.clear();
+		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	}
+}
+
+// Reads a non-empty, non-whitespace-only string. Re-prompts if blank.
+std::string readNonEmptyString(const std::string& prompt) {
+	std::string value;
+	while (true) {
+		std::cout << prompt;
+		std::getline(std::cin, value);
+		// Check if string has at least one non-whitespace character
+		bool hasContent = std::any_of(value.begin(), value.end(),
+			[](unsigned char c) { return !std::isspace(c); });
+		if (hasContent) {
+			return value;
+		}
+		std::cout << "  [!] Description cannot be empty. Please try again." << std::endl;
+	}
+}
+
+// ---------------------------------------------------------------------------
 
 std::string categoryToString(ExpenseCategory cat) {
 	switch (cat) {
@@ -33,21 +93,33 @@ std::string categoryToString(ExpenseCategory cat) {
 }
 
 ExpenseCategory selectCategory() {
-	std::cout << std::endl;
-	std::cout << "  Select category :" << std::endl;
-	std::cout << "  [1] Food" << std::endl;
-	std::cout << "  [2] Rent" << std::endl;
-	std::cout << "  [3] Education" << std::endl;
-	std::cout << "  [4] Transport" << std::endl;
-	std::cout << "  [5] Entertainment" << std::endl;
-	std::cout << "  [6] Health" << std::endl;
-	std::cout << "  [7] Shopping" << std::endl;
-	std::cout << "  [8] Other" << std::endl;
-	std::cout << "  Choice : ";
-
 	int choice;
-	std::cin >> choice;
-	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	while (true) {
+		std::cout << std::endl;
+		std::cout << "  Select category :" << std::endl;
+		std::cout << "  [1] Food" << std::endl;
+		std::cout << "  [2] Rent" << std::endl;
+		std::cout << "  [3] Education" << std::endl;
+		std::cout << "  [4] Transport" << std::endl;
+		std::cout << "  [5] Entertainment" << std::endl;
+		std::cout << "  [6] Health" << std::endl;
+		std::cout << "  [7] Shopping" << std::endl;
+		std::cout << "  [8] Other" << std::endl;
+		std::cout << "  Choice : ";
+
+		if (std::cin >> choice) {
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			if (choice >= 1 && choice <= 8) {
+				break;
+			}
+			std::cout << "  [!] Please enter a number between 1 and 8." << std::endl;
+		}
+		else {
+			std::cout << "  [!] Invalid input. Please enter a number between 1 and 8." << std::endl;
+			std::cin.clear();
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		}
+	}
 
 	switch (choice) {
 		case 1: return ExpenseCategory::Food;
@@ -65,7 +137,6 @@ int main() {
 
 	char inputOption;
 	std::string version = "PROTOTYPE";
-	double amount;
 	std::list<Transaction> expenses;
 	std::list<Transaction>::iterator it;
 
@@ -98,16 +169,13 @@ int main() {
 		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
 		if (inputOption == 'a') {
-			std::cout << "Input amount : ";
-			std::cin >> amount;
-			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			double amount = readDouble("Input amount : ");
 			if (amount > balance.getBalance()) {
-				std::cout << "Insufficient amount" << std::endl;
+				std::cout << "  [!] Insufficient balance. You only have "
+					<< std::fixed << std::setprecision(2) << balance.getBalance() << "." << std::endl;
 			}
 			else {
-				std::string desc;
-				std::cout << "Enter expense description : ";
-				std::getline(std::cin, desc);
+				std::string desc = readNonEmptyString("Enter expense description : ");
 				ExpenseCategory cat = selectCategory();
 				expenses.push_back(Transaction(desc, amount, cat));
 				balance.setBalance(balance.getBalance() - amount);
@@ -115,16 +183,10 @@ int main() {
 			}
 		}
 		else if (inputOption == 'b') {
-			std::cout << "Enter amount to add : ";
-			std::cin >> amount;
-			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-			if (amount <= 0) {
-				std::cout << "Amount must be greater than zero." << std::endl;
-			}
-			else {
-				balance.setBalance(balance.getBalance() + amount);
-				std::cout << "Balance updated. New balance : " << std::fixed << std::setprecision(2) << balance.getBalance() << std::endl;
-			}
+			double amount = readDouble("Enter amount to add : ");
+			balance.setBalance(balance.getBalance() + amount);
+			std::cout << "Balance updated. New balance : "
+				<< std::fixed << std::setprecision(2) << balance.getBalance() << std::endl;
 		}
 		else if (inputOption == 'c') {
 			std::cout << "Current balance : " << std::fixed << std::setprecision(2) << balance.getBalance() << std::endl;
@@ -134,10 +196,7 @@ int main() {
 				std::cout << "Nothing to delete - your list is empty." << std::endl;
 			}
 			else {
-				int id;
-				std::cout << "Delete transaction ID : ";
-				std::cin >> id;
-				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+				int id = readInt("Delete transaction ID : ");
 
 				for (it = expenses.begin(); it != expenses.end(); it++) {
 					if (id == it->getID()) {
@@ -146,7 +205,7 @@ int main() {
 				}
 
 				if (it == expenses.end()) {
-					std::cout << "Invalid ID no transaction found." << std::endl;
+					std::cout << "  [!] No transaction found with ID " << id << "." << std::endl;
 				}
 				else {
 					balance.setBalance(balance.getBalance() + it->getPrice());
@@ -181,10 +240,7 @@ int main() {
 				std::cout << "Nothing to edit - your list is empty." << std::endl;
 			}
 			else {
-				int id;
-				std::cout << "Edit transaction ID : ";
-				std::cin >> id;
-				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+				int id = readInt("Edit transaction ID : ");
 
 				for (it = expenses.begin(); it != expenses.end(); it++) {
 					if (id == it->getID()) {
@@ -193,21 +249,20 @@ int main() {
 				}
 
 				if (it == expenses.end()) {
-					std::cout << "Invalid ID no transaction found." << std::endl;
+					std::cout << "  [!] No transaction found with ID " << id << "." << std::endl;
 				}
 				else {
 					double available = balance.getBalance() + it->getPrice();
+					std::cout << "  (Available budget for this expense: "
+						<< std::fixed << std::setprecision(2) << available << ")" << std::endl;
 
-					std::cout << "Enter new amount : ";
-					std::cin >> amount;
-					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+					double amount = readDouble("Enter new amount : ");
 					if (amount > available) {
-						std::cout << "Insufficient amount" << std::endl;
+						std::cout << "  [!] Insufficient balance. Available: "
+							<< std::fixed << std::setprecision(2) << available << "." << std::endl;
 					}
 					else {
-						std::string desc;
-						std::cout << "Enter new description : ";
-						std::getline(std::cin, desc);
+						std::string desc = readNonEmptyString("Enter new description : ");
 						ExpenseCategory cat = selectCategory();
 						it->setDescription(desc);
 						it->setPrice(amount);
@@ -222,6 +277,10 @@ int main() {
 			std::cout << "Press enter to exit.....";
 			std::cin.get();
 			return 0;
+		}
+		else {
+			std::cout << "  [!] Invalid option '" << inputOption
+				<< "'. Please choose from the menu." << std::endl;
 		}
 
 		std::cout << "\nPress enter to continue...";

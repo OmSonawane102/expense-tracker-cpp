@@ -72,3 +72,6 @@ public:
 // Utility
 // ---------------------------------------------------------------------------
 void clearConsole();
+double readDouble(const std::string& prompt, double minVal = 0.0);
+int readInt(const std::string& prompt);
+std::string readNonEmptyString(const std::string& prompt);
