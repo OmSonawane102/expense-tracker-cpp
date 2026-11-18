@@ -24,7 +24,7 @@ void clearConsole() {
 // ---------------------------------------------------------------------------
 
 // Reads a double > minVal (default 0). Re-prompts on non-numeric or out-of-range.
-double readDouble(const std::string& prompt, double minVal = 0.0) {
+double readDouble(const std::string& prompt, double minVal) {
 	double value;
 	while (true) {
 		std::cout << prompt;
@@ -165,7 +165,11 @@ int main() {
 		std::cout << "------------------------------------------------------------" << std::endl << std::endl;
 
 		std::cout << "Select option : ";
-		std::cin >> inputOption;
+		if (!(std::cin >> inputOption)) {
+			// EOF or unrecoverable stream error – exit cleanly
+			std::cout << "\nInput stream closed. Exiting.\n";
+			return 0;
+		}
 		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
 		if (inputOption == 'a') {
@@ -284,6 +288,7 @@ int main() {
 		}
 
 		std::cout << "\nPress enter to continue...";
-		std::cin.get();
+		// Drain any leftover characters first, then wait for a fresh Enter.
+		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 	}
 }
