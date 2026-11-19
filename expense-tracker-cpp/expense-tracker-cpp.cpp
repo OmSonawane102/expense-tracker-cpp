@@ -1,12 +1,16 @@
 ﻿// expense-tracker-cpp.cpp : Defines the entry point for the application.
 
 #include "expense-tracker-cpp.h"
+#include "json.hpp"
 #include <iostream>
 #include <limits>
 #include <list>
 #include <iomanip>
 #include <cstdlib>
 #include <algorithm>
+#include <fstream>
+
+using json = nlohmann::json;
 
 // Static member definition (must live in exactly one .cpp)
 int Transaction::next_id = 1;
@@ -133,6 +137,76 @@ ExpenseCategory selectCategory() {
 	}
 }
 
+// ---------------------------------------------------------------------------
+// Persistence — save / load
+// ---------------------------------------------------------------------------
+
+// Maps ExpenseCategory enum <-> its string representation in JSON.
+// Using the existing categoryToString() for the forward direction.
+static ExpenseCategory categoryFromString(const std::string& s) {
+	if (s == "Food")          return ExpenseCategory::Food;
+	if (s == "Rent")          return ExpenseCategory::Rent;
+	if (s == "Education")     return ExpenseCategory::Education;
+	if (s == "Transport")     return ExpenseCategory::Transport;
+	if (s == "Entertainment") return ExpenseCategory::Entertainment;
+	if (s == "Health")        return ExpenseCategory::Health;
+	if (s == "Shopping")      return ExpenseCategory::Shopping;
+	return ExpenseCategory::Other;
+}
+
+// Writes the full app state (wallet balance + all expenses) to DATA_FILE.
+void saveData(const std::list<Transaction>& expenses, const Wallet& wallet) {
+	json j;
+	j["balance"] = wallet.getBalance();
+	j["expenses"] = json::array();
+	for (const auto& t : expenses) {
+		j["expenses"].push_back({
+			{"id",          t.getID()},
+			{"description", t.getDescription()},
+			{"price",       t.getPrice()},
+			{"category",    categoryToString(t.getCategory())}
+		});
+	}
+	std::ofstream file(DATA_FILE);
+	if (file.is_open()) {
+		file << j.dump(4); // pretty-print with 4-space indent
+	}
+}
+
+// Loads app state from DATA_FILE. Returns false if the file doesn't exist yet
+// (first run) or is malformed — the caller keeps default values in that case.
+bool loadData(std::list<Transaction>& expenses, Wallet& wallet) {
+	std::ifstream file(DATA_FILE);
+	if (!file.is_open()) {
+		return false; // no save file yet — first run
+	}
+	try {
+		json j;
+		file >> j;
+
+		wallet.setBalance(j.at("balance").get<double>());
+
+		int maxId = 0;
+		for (const auto& item : j.at("expenses")) {
+			int id           = item.at("id").get<int>();
+			std::string desc = item.at("description").get<std::string>();
+			double price     = item.at("price").get<double>();
+			ExpenseCategory cat = categoryFromString(item.at("category").get<std::string>());
+			expenses.emplace_back(id, desc, price, cat);
+			if (id > maxId) maxId = id;
+		}
+		// Advance the static counter so new IDs don't collide with loaded ones.
+		Transaction::setNextId(maxId + 1);
+	}
+	catch (...) {
+		// Malformed JSON — start fresh rather than crash.
+		expenses.clear();
+		wallet.setBalance(0);
+		return false;
+	}
+	return true;
+}
+
 int main() {
 
 	char inputOption;
@@ -147,6 +221,11 @@ int main() {
 	// Initial wallet
 	Wallet balance;
 	balance.setBalance(0); // starts at zero; use [b]alance add to top up
+
+	// Load persisted data (silently skipped on first run)
+	if (loadData(expenses, balance)) {
+		std::cout << "  [i] Data loaded from " << DATA_FILE << ".\n";
+	}
 
 	while (true) {
 		clearConsole();
@@ -183,12 +262,14 @@ int main() {
 				ExpenseCategory cat = selectCategory();
 				expenses.push_back(Transaction(desc, amount, cat));
 				balance.setBalance(balance.getBalance() - amount);
+				saveData(expenses, balance);
 				std::cout << "Expense added." << std::endl;
 			}
 		}
 		else if (inputOption == 'b') {
 			double amount = readDouble("Enter amount to add : ");
 			balance.setBalance(balance.getBalance() + amount);
+			saveData(expenses, balance);
 			std::cout << "Balance updated. New balance : "
 				<< std::fixed << std::setprecision(2) << balance.getBalance() << std::endl;
 		}
@@ -214,6 +295,7 @@ int main() {
 				else {
 					balance.setBalance(balance.getBalance() + it->getPrice());
 					expenses.erase(it);
+					saveData(expenses, balance);
 					std::cout << "Transaction deleted." << std::endl;
 				}
 			}
@@ -272,6 +354,7 @@ int main() {
 						it->setPrice(amount);
 						it->setCategory(cat);
 						balance.setBalance(available - amount);
+						saveData(expenses, balance);
 						std::cout << "Transaction updated." << std::endl;
 					}
 				}

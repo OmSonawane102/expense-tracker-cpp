@@ -3,6 +3,7 @@
 #pragma once
 
 #include <string>
+#include <list>
 
 // ---------------------------------------------------------------------------
 // ExpenseCategory
@@ -39,6 +40,12 @@ public:
 	Transaction() : m_id(next_id++), m_description("Transaction"), m_price(0), m_category(ExpenseCategory::Other) {}
 	Transaction(std::string desc, double amt, ExpenseCategory cat)
 		: m_id(next_id++), m_description(desc), m_price(amt), m_category(cat) {}
+	// Constructor used when loading from file — uses a known ID, does NOT advance next_id.
+	Transaction(int knownId, std::string desc, double amt, ExpenseCategory cat)
+		: m_id(knownId), m_description(desc), m_price(amt), m_category(cat) {}
+
+	// Allows persistence layer to advance the global counter after loading all saved IDs.
+	static void setNextId(int id) { next_id = id; }
 
 	// Getters
 	int getID() const { return m_id; }
@@ -75,3 +82,11 @@ void clearConsole();
 double readDouble(const std::string& prompt, double minVal = 0.0);
 int readInt(const std::string& prompt);
 std::string readNonEmptyString(const std::string& prompt);
+
+// ---------------------------------------------------------------------------
+// Persistence
+// ---------------------------------------------------------------------------
+static const std::string DATA_FILE = "expenses.json";
+
+void saveData(const std::list<Transaction>& expenses, const Wallet& wallet);
+bool loadData(std::list<Transaction>& expenses, Wallet& wallet);
