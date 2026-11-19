@@ -3,7 +3,7 @@
 A simple **command-line Expense Tracker** built using **C++**.
 
 > 🚧 **Project Status: In Development (Prototype)**
-> Core CRUD operations, balance management, expense categories, and input validation are working. Persistence and advanced features are still in progress.
+> Core CRUD operations, balance management, expense categories, input validation, and JSON persistence are working. Advanced features are still in progress.
 
 ## About
 
@@ -31,10 +31,13 @@ The main goal of this project is to practice **C++ programming, OOP, file handli
   * Rejects empty/whitespace-only descriptions
   * Category selection enforces 1–8 range
   * Invalid menu options show a clear error message
+* **JSON persistence** via [nlohmann/json](https://github.com/nlohmann/json):
+  * All expenses and balance auto-saved to `expenses.json` after every change
+  * Data restored automatically on next launch
+  * IDs never reset or collide across sessions
+  * Graceful handling of missing or corrupted save file
 
 ### 🔄 In Progress / Planned
-* [ ] Save data to file (JSON via nlohmann/json — header included)
-* [ ] Load data when the program starts
 * [ ] Date/timestamp per expense
 * [ ] Search expenses by description or ID
 * [ ] Filter by category
@@ -110,7 +113,6 @@ cmake --build out/build/x64-debug
 
 ## Future Improvements
 
-* File persistence (JSON)
 * Date/timestamp per transaction
 * Search & filter by category or description
 * Monthly summary & statistics
